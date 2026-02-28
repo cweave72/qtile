@@ -1,0 +1,4 @@
+__pycache__/
+logging_tree.txt
+*.log
+.env
