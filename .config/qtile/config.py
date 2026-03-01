@@ -60,6 +60,15 @@ except Exception:
     logger.info("QTILE_BAR_FONT_SIZE variable not set in .env, setting to 14.")
     QTILE_BAR_FONT_SIZE = 14
 
+try:
+    USE_WIFI_WIDGET = int(os.getenv("USE_WIFI_WIDGET"))
+    logger.info(f"Found {USE_WIFI_WIDGET=}")
+    WIFI_INTERFACE = os.getenv("WIFI_INTERFACE")
+    logger.info(f"Found {WIFI_INTERFACE=}")
+except Exception:
+    USE_WIFI_WIDGET = None
+    WIFI_INTERFACE = None
+
 def get_local_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         try:
@@ -93,7 +102,6 @@ def bind(key_comb, cmdobj):
         raise Exception('Bad regex match in bind function')
 
     return Key(key, char, cmdobj)
-
 term_cmd = "kitty"
 
 # Since we run qtile out of a virtual env, we don't want commands spawned to
@@ -195,6 +203,14 @@ powerline = {
     ]
 }
 
+
+def widget_filter(inst, condition):
+    if condition is not None:
+        return inst
+    else:
+        return widget.Spacer(length=0)
+
+
 # Minimal screen1 for 2-screen setups.
 screen1 = Screen(
     top=bar.Bar(
@@ -287,11 +303,12 @@ screen2 = Screen(
                 background=theme["BG2"],
                 **powerline,
             ),
-            #widget.WiFiIcon(
-            #    background=theme["BG2"],
-            #    interface='wlp0s20f3',
-            #    **powerline,
-            #),
+            widget_filter(
+                widget.WiFiIcon(
+                    background=theme["BG2"],
+                    interface='wlp0s20f3',
+                    **powerline), condition=USE_WIFI_WIDGET
+            ),
             widget.Bluetooth(
                 background=theme["BG2"],
                 **powerline,
