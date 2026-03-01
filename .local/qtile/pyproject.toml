@@ -18,5 +18,4 @@ dependencies = [
     "qtile>=0.33.0",
     "qtile-extras>=0.33.0",
     "xcffib>=1.12.0",
-    "xkbcommon>=1.5.1",
 ]

@@ -43,10 +43,22 @@ load_dotenv(ENV_FILE)
 
 try:
     NUM_SCREENS = int(os.getenv("NUM_SCREENS"))
-except KeyError:
-    logger.info(f"Env NUM_SCREENS not set, setting to 1 by default.")
+except Exception as e:
+    logger.info(f"Error setting NUM_SCREENS, setting to 1 by default: {str(e)}")
     NUM_SCREENS = 1
 
+try:
+    XRANDR_CMD = os.getenv("XRANDR_CMD")
+except KeyError:
+    logger.info("XRANDR_CMD variable not set in .env.")
+    XRANDR_CMD = None
+
+try:
+    QTILE_BAR_FONT_SIZE = int(os.getenv("QTILE_BAR_FONT_SIZE"))
+    logger.info(f"Found {QTILE_BAR_FONT_SIZE=}")
+except Exception:
+    logger.info("QTILE_BAR_FONT_SIZE variable not set in .env, setting to 14.")
+    QTILE_BAR_FONT_SIZE = 14
 
 def get_local_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -88,14 +100,17 @@ term_cmd = "kitty"
 # inherit the path to this virtual env. To fix this, we wrap the spawn command
 # and modify the env to delete the path to the virtual env prior to launching
 # the command.
-venv_path = "/home/cdweave/.local/qtile/.venv"
 def spawn_no_venv(command):
     env = os.environ.copy()
+
+    if "VIRTUAL_ENV" in env:
+        venv_path = env["VIRTUAL_ENV"]
+        logger.info(f"Found VIRTUAL_ENV={venv_path}")
+        env["PATH"] = env["PATH"].replace(f"{venv_path}/bin:", "")
+        env["VIRTUAL_ENV"] = env["VIRTUAL_ENV"].replace(f"{venv_path}", "")
+
     #logger.info(f"spawing {command=} {env=}")
-    #logger.info(f"VIRTUAL_ENV={env['VIRTUAL_ENV']}")
     #logger.info(f"PATH={env['PATH']}")
-    env["PATH"] = env["PATH"].replace(f"{venv_path}/bin:", "")
-    env["VIRTUAL_ENV"] = env["VIRTUAL_ENV"].replace(f"{venv_path}", "")
     qtile.spawn(command, env=env)
 
 
@@ -185,7 +200,7 @@ screen1 = Screen(
     top=bar.Bar(
         [
             widget.WindowName(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["white"],
                 background=theme["BG4"],
@@ -198,7 +213,7 @@ screen1 = Screen(
                 **powerline,
             ),
             widget.CurrentLayout(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["green"],                         
                 background=theme["background"],
@@ -210,7 +225,7 @@ screen1 = Screen(
     bottom=bar.Bar(
         [
             widget.GroupBox2(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 active=theme["green"],
                 highlight_method="default",
@@ -222,7 +237,7 @@ screen1 = Screen(
                 ),
             widget.Prompt(),
             widget.WindowTabs(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["white"],
                 background=theme["BG4"],
@@ -240,7 +255,7 @@ screen2 = Screen(
     top=bar.Bar(
         [
             widget.WindowName(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["white"],
                 background=theme["BG4"],
@@ -255,14 +270,14 @@ screen2 = Screen(
             widget.TextBox(
                 f"ip: {local_ip}",
                 name="default",
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["foreground"],                         
                 background=theme["background"],
                 **powerline,
                 ),
             widget.CurrentLayout(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["green"],                         
                 background=theme["background"],
@@ -272,17 +287,17 @@ screen2 = Screen(
                 background=theme["BG2"],
                 **powerline,
             ),
-            widget.WiFiIcon(
-                background=theme["BG2"],
-                interface='wlp0s20f3',
-                **powerline,
-            ),
+            #widget.WiFiIcon(
+            #    background=theme["BG2"],
+            #    interface='wlp0s20f3',
+            #    **powerline,
+            #),
             widget.Bluetooth(
                 background=theme["BG2"],
                 **powerline,
             ),
             widget.Systray(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 background=theme["BG2"],
                 icon_size=20,
@@ -295,7 +310,7 @@ screen2 = Screen(
     bottom=bar.Bar(
         [
             widget.GroupBox2(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 active=theme["green"],
                 highlight_method="default",
@@ -307,7 +322,7 @@ screen2 = Screen(
                 ),
             widget.Prompt(),
             widget.WindowTabs(
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["white"],
                 background=theme["BG4"],
@@ -317,7 +332,7 @@ screen2 = Screen(
                 ),
             widget.Clock(
                 format='%Y-%m-%d %a %I:%M %p',
-                fontsize=14,
+                fontsize=QTILE_BAR_FONT_SIZE,
                 font="FiraCode Nerd Font Regular",
                 foreground=theme["green"],                         
                 background=theme["BG"],
@@ -386,8 +401,9 @@ def run(cmdline):
 
 @hook.subscribe.startup_once
 def autostart():
-    auto = osp.expanduser('~/.config/qtile/autostart.sh')
-    run(auto)
+    pass
+    #auto = osp.expanduser('~/.config/qtile/autostart.sh')
+    #run(auto)
 
 
 @hook.subscribe.startup
@@ -399,10 +415,15 @@ def startup():
     logger.info(f"Python version: {sys.version}")
     logger.info(f"Qtile system log: ~/.local/share/qtile/qtile.log")
     logger.info(f"NUM_SCREENS={NUM_SCREENS}")
+    logger.info(f"QTILE_BAR_FONT_SIZE={QTILE_BAR_FONT_SIZE}")
     logger.info(f"HOME={os.environ['HOME']}")
     logger.info(f"DISPLAY={os.environ['DISPLAY']}")
     logger.info(f"VIRTUAL_ENV={os.environ['VIRTUAL_ENV']}")
     logger.info(f"PATH={os.environ['PATH']}")
+
+    logger.info("Running autostart.sh")
+    auto = osp.expanduser('~/.config/qtile/autostart.sh')
+    run(auto)
 
     # Write the logging tree to a file.
     with open(".config/qtile/logging_tree.txt", 'w') as f:
@@ -414,6 +435,9 @@ def startup_init():
     """
     Run after qtile is started initially.
     """
-    #run('xrandr --output DP1 --primary --mode 1920x1080 --rate 60.00 --output DP2 --mode 1920x1080 --rate 60.00 --right-of DP1')
+    if XRANDR_CMD is not None:
+        #run('xrandr --output DP1 --primary --mode 1920x1080 --rate 60.00 --output DP2 --mode 1920x1080 --rate 60.00 --right-of DP1')
+        logger.info(f"Running {XRANDR_CMD=}")
+        run(f"{XRANDR_CMD}")
     
     run('feh --bg-scale {}'.format(osp.join(HOME, '.config/qtile/wallpaper/iceland.jpg')))

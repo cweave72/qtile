@@ -22,6 +22,7 @@ Requirement: `uv` installed.
   * xserver-xorg-core
   * xserver-xorg-input-libinput
   * xinit
+  * libiw-dev
 
   You can check if you have xorg installed via `dpkg -l | grep xserver-xorg-core`
 
@@ -67,9 +68,10 @@ NUM_SCREENS=1
 
 The picom X11 compositor allows effects such as corner radius and blurring.
 
-Install picom:
+Install picom and dependencies:
 ```
 sudo apt install picom
+sudo apt install mesa-utils
 ```
 
 Create a symlink:
