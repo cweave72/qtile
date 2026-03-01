@@ -401,9 +401,9 @@ def run(cmdline):
 
 @hook.subscribe.startup_once
 def autostart():
-    pass
-    #auto = osp.expanduser('~/.config/qtile/autostart.sh')
-    #run(auto)
+    logger.info("Running autostart.sh")
+    auto = osp.expanduser('~/.config/qtile/autostart.sh')
+    run(auto)
 
 
 @hook.subscribe.startup
@@ -421,10 +421,6 @@ def startup():
     logger.info(f"VIRTUAL_ENV={os.environ['VIRTUAL_ENV']}")
     logger.info(f"PATH={os.environ['PATH']}")
 
-    logger.info("Running autostart.sh")
-    auto = osp.expanduser('~/.config/qtile/autostart.sh')
-    run(auto)
-
     # Write the logging tree to a file.
     with open(".config/qtile/logging_tree.txt", 'w') as f:
         f.write(logging_tree.format.build_description())
@@ -436,7 +432,6 @@ def startup_init():
     Run after qtile is started initially.
     """
     if XRANDR_CMD is not None:
-        #run('xrandr --output DP1 --primary --mode 1920x1080 --rate 60.00 --output DP2 --mode 1920x1080 --rate 60.00 --right-of DP1')
         logger.info(f"Running {XRANDR_CMD=}")
         run(f"{XRANDR_CMD}")
     
