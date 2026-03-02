@@ -1,18 +1,21 @@
 # Qtile Configuration
 
 This repository holds configuration for the [Qtile](https://qtile.org) tiling
-window manager.
+window manager along with other terminal-related tools:
 
 * `.local/qtile` : Setup for running Qtile within a virtual environment.
 * `.config/qtile` : Qtile configuration.
+* `.config/kitty` : kitty configuration.
 * `.config/picom` : picom X11 compositor config
 * `.config/powerline` : Shell powerline config.
+* `.config/ranger` : A file terminal-based file browser.
 
 Clone: `git clone https://github.com/cweave72/qtile`
 
 Tested with:
 * Python 3.11
 * Ubuntu 25.04
+* Ubuntu 22.04
 
 ## Setting up to run Qtile from virtual environment
 
@@ -59,10 +62,17 @@ ln -s <path to cloned repo>/qtile/.config/qtile qtile
 Within the `~/.config/qtile` directory, create a site-specific `.env` file.
 This file is used to set the number of screens being used.
 
-Example for specifying a single screen: .env:
+Example for specifying a 2-screen: .env:
 ```
-NUM_SCREENS=1
+NUM_SCREENS=2
+QTILE_BAR_FONT_SIZE=11
+XRANDR_CMD="xrandr --output DP1 --primary --mode 1920x1080 --rate 60.00 --output DP2 --mode 1920x1080 --rate 60.00 --right-of DP1"
 ```
+
+* `NUM_SCREENS`: The number of screens in the setup (Defaults to 1, max is 2).
+* `QTILE_BAR_FONT_SIZE`: Controls the font size in the qtile top and bottom bar.
+* `XRANDR_CMD`: A command that is run on startup for setting screen resolution,
+  etc...
 
 ## picom
 
@@ -98,3 +108,4 @@ lrwxrwxrwx 1 cdweave cdweave       53 Feb 28 14:46 powerline-render -> /home/cdw
 -rwxr-xr-x 1 cdweave cdweave   344368 Feb 16 06:10 uvx
 ```
 
+Source the `bash_init.sh` script in `.bashrc` to enable powerline.
